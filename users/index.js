@@ -66,6 +66,7 @@ useEffect(
  const [content, setContent] = useState('');
  const [status, setStatus] = useState(true);
  const [showInfo, setShowInfo] = useState(true);
+ const [showEditComic, setShowEditComic] = useState(false);
  // Chuyen viec su dung userprofile sang state, de khi user thay doi gia tri se render lai man hinh
  const [comics, setComic] = useState(comicProfile);
  const [ifo, setInfo] = useState(info);
