@@ -64,7 +64,7 @@ useEffect(
  const [chapters, setChapters] = useState('');
  const [author, setAuthor] = useState('');
  const [content, setContent] = useState('');
- const [status, setStatus] = useState(true);
+ const [status, setStatus] = useState("");
  const [showInfo, setShowInfo] = useState(true);
  // Chuyen viec su dung userprofile sang state, de khi user thay doi gia tri se render lai man hinh
  const [comics, setComic] = useState(comicProfile);
@@ -72,6 +72,7 @@ useEffect(
  const [showModalComic, setShowModalComic] = useState(false);
  const [showLoading, setShowLoading] = useState(false);
  const [showAddComic, setShowAddComic] = useState(false);
+ const [showEditComic, setShowEditComic] = useState(true);
  // Tao state kiem soat viec hien thi cua modal add Comic
  const [showModalUser, setShowModalUser] = useState(true);
  const [showComic, setShowComic] = useState(false);
@@ -153,6 +154,7 @@ setShowComic(false);
 }
 
 const handleUpdateComic = (responseJson) => {
+ 
   const newComics = [...comics];
   // Tim vi tri item bi thay doi
   const updateSubjectIndex = newComics.findIndex(item => item.id === responseJson.id);
@@ -175,8 +177,7 @@ const setModalData = (data) => {
 }
 const handleSubmit = () => {
   // 1. Hien thi loading va an modal sau khi press submit
-  setShowLoading(true);
-  setShowAddComic(false);
+ 
   // 2. Khai bao subject duoc them moi kem key value
   const subject = {
     category:category,
@@ -186,6 +187,7 @@ const handleSubmit = () => {
     author:author,
     content:content
   };
+ 
   // const subject = {
   //     className,
   //     name: subjectName,
@@ -218,10 +220,26 @@ const handleSubmit = () => {
           // setComic(newComics);
           // setShowLoading(false);
           if(!isUpdate){
-          const newComic=[...comics];
+            if (category == "" || name=="" || chapters == "" || content == "" || status == "") {
+ 
+              Alert.alert(
+                'Bạn phải nhập đầy đủ thông tin')
+      
+            } else {
+                if (status == true) {
+                    setStatus("true")
+                } else {
+                    setStatus("false")
+          
+                }
+                setShowAddComic(false)
+                const newComic=[...comics];
           newComic.push(responseJson);
           setComic(newComic);
-          setShowLoading(false);}
+          setShowLoading(false);
+       
+              }
+          }
           if(isUpdate){
             let newComic=[...comics];
             console.log(newComic)
@@ -231,10 +249,10 @@ const handleSubmit = () => {
   newComic[updateSubjectIndex] = responseJson;
   setComic(newComic);
   setShowLoading(false);}
-          
+  setShowAddComic(false)
       })
       .catch((error) => console.log(`ERROR: ${error}`));
-
+    
   setModalData({
       category: '',
       name: '',
@@ -243,15 +261,28 @@ const handleSubmit = () => {
       author:'',
       content:''
   });
+
 }
 
 const showEditModal = (id) => {
   const cm = comics.find((item) => item.id == id);
-
+setShowEditComic(true);
   setModalData(cm);
   setShowAddComic(true);
 }
+const showAddModal = (id) => {
 
+  setShowEditComic(false);
+  setModalData({
+    category: '',
+    name: '',
+    img: '',
+    chapters: '',
+    author:'',
+    content:''
+});
+  setShowAddComic(true);
+}
 const handleCancle = () => {
   setShowAddComic(false);
 }
@@ -273,350 +304,353 @@ const handleCancle = () => {
   )
 };
  return (
-   <View >
+  <View >
 
-   
-     <View style={{flex:1,flexDirection:"column", marginTop :Platform.OS==='ios'?34:0}}   >
- <View style={{height:64,marginBottom:50,alignItems:"center"}}>
-       {showInfo ? <InfoText data={ifo} /> : null}
-       <Text>--------------</Text>
-       <Button
-         title="Quay lại"
-         onPress={() => {
-           setShowModalUser(true);
-         }}
 
-       />
-   
-   <TouchableHighlight
-                          style={style.submit1}
-                          onPress={() => { setShowAddComic(true) }}
-                          underlayColor='#fff'>
-                          <Text style={style.submitText}>ADD</Text>
-       </TouchableHighlight>
-     
-     </View>
-        <View style={{ height: 500, backgroundColor: "white" }} >
-        {
-                showLoading
-                    ? <Text>LOADING...</Text>
-                    : null
-            }
-           <FlatList
-            data={comics} 
-            renderItem={({ item }) => (
-              <View>
-              <View style={style.row}>
-                  <View style={style.viewboder}>
-                      < Image style={style.image} source={{ uri: item.img }} />
-                  </View>
-                  <View style={style.item1} >
-                      <View >
-                          <Text style={style.h1}>{`Name: ${item.name}`}</Text>
-                          <Text style={style.h2}>{`Category: ${item.category}`}</Text>
-                          <Text style={style.h2}>{`Chapters: ${item.chapters}`}</Text>
+  <View style={{ flex: 1, flexDirection: "column", marginTop: Platform.OS === 'ios' ? 34 : 0 }}   >
+    <View style={{ height: 64, marginBottom: 50, alignItems: "center" }}>
+      {showInfo ? <InfoText data={ifo} /> : null}
+      <Text>--------------</Text>
+      <Button
+        title="Quay lại"
+        onPress={() => {
+          setShowModalUser(true);
+        }}
 
-                          <Text style={style.h2}>{`Active: ${item.active ? 'Full' : 'Not full'}`}</Text>
-                      </View>
-                  </View>
-                  <View style={style.item} >
+      />
 
-                      <TouchableHighlight
-                          style={style.submit}
-                          onPress={() => { alertDelete(item.name,item.id) }}
-                          underlayColor='#fff'>
-                          <Text style={style.submitText}>Delete</Text>
-                      </TouchableHighlight>
-                      <TouchableHighlight
-                          style={style.submit}
-                          onPress={() => {showEditModal(item.id)}}
-                          underlayColor='#fff'>
-                          <Text style={style.submitText}>Edit</Text>
-                      </TouchableHighlight>
-                      <TouchableHighlight
-                          style={style.submit}
-                          onPress={() => { handleGetItem(item.id)}}>
-                          <Text style={style.submitText}>Detail</Text>
-                      </TouchableHighlight>
-                  </View>
+      <TouchableHighlight
+        style={style.submit1}
+        onPress={() => { showAddModal() }}
+        underlayColor='#fff'>
+        <Text style={style.submitText}>ADD</Text>
+      </TouchableHighlight>
+
+    </View>
+    <View style={{ height: 500, backgroundColor: "white" }} >
+      {
+        showLoading
+          ? <Text>LOADING...</Text>
+          : null
+      }
+      <FlatList
+        data={comics}
+        renderItem={({ item }) => (
+          <View>
+            <View style={style.row}>
+              <View style={style.viewboder}>
+                < Image style={style.image} source={{ uri: item.img }} />
               </View>
-              <View style={style.solid}>
+              <View style={style.item1} >
+                <View >
+                  <Text style={style.h1}>{`Name: ${item.name}`}</Text>
+                  <Text style={style.h2}>{`Category: ${item.category}`}</Text>
+                  <Text style={style.h2}>{`Chapters: ${item.chapters}`}</Text>
 
+                  <Text style={style.h2}>{`Active: ${item.active ? 'Full' : 'Not full'}`}</Text>
+                </View>
               </View>
+              <View style={style.item} >
+
+                <TouchableHighlight
+                  style={style.submit}
+                  onPress={() => { alertDelete(item.name, item.id) }}
+                  underlayColor='#fff'>
+                  <Text style={style.submitText}>Delete</Text>
+                </TouchableHighlight>
+                <TouchableHighlight
+                  style={style.submit}
+                  onPress={() => { showEditModal(item.id) }}
+                  underlayColor='#fff'>
+                  <Text style={style.submitText}>Edit</Text>
+                </TouchableHighlight>
+                <TouchableHighlight
+                  style={style.submit}
+                  onPress={() => { handleGetItem(item.id) }}>
+                  <Text style={style.submitText}>Detail</Text>
+                </TouchableHighlight>
+              </View>
+            </View>
+            <View style={style.solid}>
+
+            </View>
           </View>
-            )} // item ứng với {name: '', identity: '', className: ''}
-            keyExtractor={(item, index) => item.id}
-          />
-        </View>
+        )} // item ứng với {name: '', identity: '', className: ''}
+        keyExtractor={(item, index) => item.id}
+      />
+    </View>
+  </View>
+
+  <Modal visible={showModalUser}>
+    <View style={styles.container}>
+      <Text style={styles.title}>Thông tin người dùng</Text>
+      <Text style={styles.chu}>Tên</Text>
+      <TextInput style={styles.inputLabel} value={inputUserName} onChangeText={(value) => setInputUserName(value)} />
+      <Text style={styles.chu}>Tuổi</Text>
+      <TextInput keyboardType='number-pad' style={styles.inputLabel} value={inputUserAge} onChangeText={(value) => setInputUserAge(value)} />
+      <TouchableHighlight
+        disabled={showComic}
+        style={style.submit}
+
+        onPress={() => {
+          if (inputUserName == "" || inputUserAge == "") {
+
+            Alert.alert(
+              'Bạn phải nhập đầy đủ thông tin')
+
+
+          } else {
+            if (inputUserAge < 18) {
+              setShowComic(true)
+              Alert.alert(
+                'Bạn chưa đủ tuổi !'
+              )
+              setDefaultButton();
+            }
+
+            else {
+              setShowModalUser(false);
+              setShowComic(false);
+
+              handleAddUser()
+            }
+          }
+
+        }
+        }
+        underlayColor='#fff'>
+        <Text style={style.submitText}>Vào đọc truyện</Text>
+      </TouchableHighlight>
+
+    </View>
+  </Modal>
+  <Modal visible={showModalComic} >
+
+    <View style={style.colum}>
+   < View style={style.viewboder1} >
+        < Image style={style.imgmodel} source={{ uri: currentComic.img }} />
       </View>
-      
-      <Modal visible={showModalUser}>
-        <View style={styles.container}>
-          <Text style={styles.title}>Thông tin người dùng</Text>
-          <Text style={styles.chu}>Tên</Text>
-          <TextInput style={styles.inputLabel} value={inputUserName} onChangeText={(value) => setInputUserName(value)} />
-          <Text style={styles.chu}>Tuổi</Text>
-          <TextInput keyboardType='number-pad' style={styles.inputLabel} value={inputUserAge} onChangeText={(value) => setInputUserAge(value)} />
-          <TouchableHighlight
-            disabled={showComic}
-            style={style.submit}
-
-            onPress={() => {
-              if (inputUserAge == "" || inputUserAge == "") {
-
-                Alert.alert(
-                  'Bạn phải nhập đầy đủ thông tin')
-
-
-              } else {
-                if (inputUserAge < 18) {
-                  setShowComic(true)
-                  Alert.alert(
-                    'Bạn chưa đủ tuổi !'
-                  )
-                  setDefaultButton();
-                }
-
-                else {
-                  setShowModalUser(false);
-                  setShowComic(false);
-
-                  handleAddUser()
-                }
-              }
-
-            }
-            }
-            underlayColor='#fff'>
-            <Text style={style.submitText}>Vào đọc truyện</Text>
-          </TouchableHighlight>
-
-        </View>
-      </Modal>
-      <Modal visible={showModalComic} >
-
-<View style={style.colum}>
-    <View style={style.viewboder1} >
-        < Image style={style.imgmodel} source={{ uri: currentComic.img }} />
-    </View>
-    <View style={style.item1} >
+      <View style={style.item1} >
         <View  >
-            <Text style={style.h1}>{`Name: ${currentComic.name}`}</Text>
-            <Text style={style.h2}>{`Author: ${currentComic.author}`}</Text>
-            <Text style={style.h2}>{`Category: ${currentComic.category}`}</Text>
-            <Text style={style.h2}>{`Chapters: ${currentComic.chapters}`}</Text>
-            <Text style={style.h2}>{`Content: ${currentComic.content}`}</Text>
-            <Text style={style.h2}>{`Active: ${currentComic.active ? 'Full' : 'Not full'}`}</Text>
+          <Text style={style.h1}>{`Name: ${currentComic.name}`}</Text>
+          <Text style={style.h2}>{`Author: ${currentComic.author}`}</Text>
+          <Text style={style.h2}>{`Category: ${currentComic.category}`}</Text>
+          <Text style={style.h2}>{`Chapters: ${currentComic.chapters}`}</Text>
+          <Text style={style.h2}>{`Content: ${currentComic.content}`}</Text>
+          <Text style={style.h2}>{`Active: ${currentComic.active ? 'Full' : 'Not full'}`}</Text>
         </View>
 
         <TouchableHighlight
-            style={style.submit}
-            onPress={() => { setShowModalComic(false) }}>
-            <Text style={style.submitText}>BACK</Text>
+          style={style.submit}
+          onPress={() => { setShowModalComic(false) }}>
+          <Text style={style.submitText}>BACK</Text>
         </TouchableHighlight>
+      </View>
     </View>
+  </Modal>
+  <Modal visible={showAddComic}  >
+  {showEditComic ? < View style={style.viewboder1} >
+        < Image style={style.imgmodel} source={{ uri: img }} />
+      </View>
+          : null}
+    <ScrollView>
+      <View style={style.h1}>
+        <Text style={styles.chu} >Name</Text>
+        <TextInput style={styles.inputLabel} value={name} onChangeText={(value) => setName(value)} />
+      </View>
+      <View style={style.h2}>
+        <Text style={styles.chu}>Author</Text>
+        <TextInput style={styles.inputLabel} value={author} onChangeText={(value) => setAuthor(value)} />
+      </View  >
+      <View style={style.h2}>
+        <Text style={styles.chu}>Category</Text>
+        <TextInput style={styles.inputLabel} value={category} onChangeText={(value) => setCategory(value)} />
+      </View>
+      <View style={style.h2}>
+        <Text style={styles.chu}>Chapters</Text>
+        <TextInput style={styles.inputLabel} value={chapters} onChangeText={(value) => setChapters(value)} />
+      </View>
+      <View style={style.h2}>
+        <Text style={styles.chu}>Content</Text>
+        <TextInput style={styles.inputLabel} value={content} onChangeText={(value) => setContent(value)} />
+      </View >
+      <View style={styles.chu} >
+        <Text>Active</Text>
+
+        <Switch value={status} onValueChange={() => setStatus(!status)} />
+      </View>
+
+      <TouchableHighlight
+        style={style.submit}
+        onPress={() => { 
+         
+          handleSubmit() }}>
+        <Text style={style.submitText}>Submit</Text>
+      </TouchableHighlight>
+      <TouchableHighlight
+        style={style.submit}
+        onPress={() => { setShowAddComic(false) }}>
+        <Text style={style.submitText}>Comic</Text>
+      </TouchableHighlight>
+    </ScrollView>
+  </Modal>
+  
 </View>
-</Modal>
-<Modal   visible={showAddComic}  >
-<View style={style.viewboder1} >
-        < Image style={style.imgmodel} source={{ uri: currentComic.img }} />
-    </View>
-  <ScrollView>
-          <View style={style.h1}>
-            <Text style={styles.chu} >Name</Text>
-            <TextInput style={styles.inputLabel} value={name} onChangeText={(value) => setName(value)} />
-          </View>
-          <View style={style.h2}>
-            <Text style={styles.chu}>Author</Text>
-            <TextInput style={styles.inputLabel} value={author} onChangeText={(value) => setAuthor(value)} />
-          </View  >
-     
-          <View style={style.h2}>
-            <Text style={styles.chu}>Category</Text>
-            <TextInput style={styles.inputLabel} value={category} onChangeText={(value) => setCategory(value)} />
-          </View>
-          <View style={style.h2}>
-            <Text style={styles.chu}>Chapters</Text>
-            <TextInput style={styles.inputLabel} value={chapters} onChangeText={(value) => setChapters(value)} />
-          </View>
-          <View style={style.h2}>
-            <Text style={styles.chu}>Content</Text>
-            <TextInput style={styles.inputLabel} value={content} onChangeText={(value) => setContent(value)} />
-          </View >
-          <View style={styles.chu} >
-            <Text>Active</Text>
-           
-            <Switch value={status} onValueChange={() => setStatus(!status)} />
-          </View>
-          
-        <TouchableHighlight
-            style={style.submit}
-            onPress={() => {handleSubmit()}}>
-            <Text style={style.submitText}>Submit</Text>
-        </TouchableHighlight>
-        <TouchableHighlight
-            style={style.submit}
-            onPress={() => {handleUpdateComic()}}>
-            <Text style={style.submitText}>Comic</Text>
-        </TouchableHighlight>
-        </ScrollView>
-          </Modal>
-    </View>
-  );
+);
 }
 
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    flexDirection: "column",
-    marginTop: Platform.OS === 'ios' ? 34 : 0
-  },
-  title: {
-    marginTop: 20,
-    fontSize: 30,
-    textAlign: "center",
-    color: "#00bcd4",
+container: {
+flex: 1,
+flexDirection: "column",
+marginTop: Platform.OS === 'ios' ? 34 : 0
+},
+title: {
+marginTop: 20,
+fontSize: 30,
+textAlign: "center",
+color: "#00bcd4",
 
-  },
-  inputLabel: {
-    fontSize: 15,
-    color: "#00bcd4",
-    borderColor: "#00bcd4",
-    borderWidth: 1,
-    borderRadius: 10,
-    margin: 8,
-    height: 50,
-    paddingLeft: 8
+},
+inputLabel: {
+fontSize: 15,
+color: "#00bcd4",
+borderColor: "#00bcd4",
+borderWidth: 1,
+borderRadius: 10,
+margin: 8,
+height: 50,
+paddingLeft: 8
 
-  },
+},
 
-  chu: {
-    padding: 10,
-    fontSize: 20,
-    color: "#00bcd4",
-    textAlign: "left"
-  },
+chu: {
+padding: 10,
+fontSize: 20,
+color: "#00bcd4",
+textAlign: "left"
+},
 
-  bt: {
-    color: "#00bcd4"
+bt: {
+color: "#00bcd4"
 
-  }
+}
 });
 const style = StyleSheet.create({
-  colum: {
-      justifyContent: "center",
-      flex: 1,
+colum: {
+justifyContent: "center",
+flex: 1,
 
-      flexDirection: 'column',
-      backgroundColor: 'white',
+flexDirection: 'column',
+backgroundColor: 'white',
 
-      borderColor: "#00bcd4",
-      marginTop: 20
-
-
-  }, solid: {
-      height: 1,
-      backgroundColor: "#00bcd4"
-  },
-  row: {
-      flex: 1,
+borderColor: "#00bcd4",
+marginTop: 20
 
 
-      flexDirection: "row",
-      backgroundColor: 'white',
-
-      borderColor: "#00bcd4"
-
-  }, viewboder: {
-
-
-      padding:10 ,
-      backgroundColor: "#ffff",
-      borderRadius: 2,
-      borderWidth: 1,
-      borderColor: '#00bcd4',
-  margin:10
-
-  },
-  viewboder1: {
-
-      padding: 10,
-      backgroundColor: "#ffff",
-      borderRadius: 2,
-      borderWidth: 1,
-      borderColor: '#00bcd4',
-      
-
-  }
-  , image: {
-
-
-      padding: 10,
-
-      width: 80,
-      height: 100,
-      borderRadius: 2
-  },
-  h1: {
-      padding: 5,
-      fontSize: 20,
-
-  },
-  h2: {
-      marginLeft: 5,
-      padding: 5,
-  },
-  submit: {
-      overflow: 'hidden',
-      marginTop: 5,
-      padding: 10,
-      backgroundColor: '#00bcd4',
-      borderRadius: 10,
-      borderWidth: 1,
-      borderColor: "#ffff"
-  },
-  submit1: {
-    width:100,
-    alignItems:"center",
-    overflow: 'hidden',
-    marginBottom: 10,
-    padding: 10,
-    backgroundColor: '#00bcd4',
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: "#ffff"
+}, solid: {
+height: 1,
+backgroundColor: "#00bcd4"
 },
-  submitText: {
-      color: '#fff',
-      textAlign: 'center',
-  }, item1: {
-      flex: 1,
-      flexDirection: "column",
-      flexGrow: 1
-  }, item: {
+row: {
+flex: 1,
 
-  },
-  row2: {
-      marginTop: 50,
 
-      display: "flex",
-      borderRadius: 5,
+flexDirection: "row",
+backgroundColor: 'white',
 
-      flexDirection: 'row',
-      backgroundColor: 'white',
+borderColor: "#00bcd4"
 
-      borderColor: "#00bcd4"
+}, viewboder: {
 
-  },
-  imgmodel: {
 
-      marginTop: 10,
-      padding: 10,
- 
-      width: 175,
-      height: 300,
-      borderRadius: 1
-  }
+padding: 10,
+backgroundColor: "#ffff",
+borderRadius: 2,
+borderWidth: 1,
+borderColor: '#00bcd4',
+margin: 10
+
+},
+viewboder1: {
+
+padding: 10,
+backgroundColor: "#ffff",
+borderRadius: 2,
+borderWidth: 1,
+borderColor: '#00bcd4',
+
+
+}
+, image: {
+
+
+padding: 10,
+
+width: 80,
+height: 100,
+borderRadius: 2
+},
+h1: {
+padding: 5,
+fontSize: 20,
+
+},
+h2: {
+marginLeft: 5,
+padding: 5,
+},
+submit: {
+overflow: 'hidden',
+marginTop: 5,
+padding: 10,
+backgroundColor: '#00bcd4',
+borderRadius: 10,
+borderWidth: 1,
+borderColor: "#ffff"
+},
+submit1: {
+width: 100,
+alignItems: "center",
+overflow: 'hidden',
+marginBottom: 10,
+padding: 10,
+backgroundColor: '#00bcd4',
+borderRadius: 10,
+borderWidth: 1,
+borderColor: "#ffff"
+},
+submitText: {
+color: '#fff',
+textAlign: 'center',
+}, item1: {
+flex: 1,
+flexDirection: "column",
+flexGrow: 1
+}, item: {
+
+},
+row2: {
+marginTop: 50,
+
+display: "flex",
+borderRadius: 5,
+
+flexDirection: 'row',
+backgroundColor: 'white',
+
+borderColor: "#00bcd4"
+
+},
+imgmodel: {
+
+marginTop: 10,
+padding: 10,
+
+width: 175,
+height: 300,
+borderRadius: 1
+}
 
 });
