@@ -177,7 +177,7 @@ const setModalData = (data) => {
 }
 const handleSubmit = () => {
   // 1. Hien thi loading va an modal sau khi press submit
- 
+  setShowLoading(true);
   // 2. Khai bao subject duoc them moi kem key value
   const subject = {
     category:category,
@@ -220,7 +220,7 @@ const handleSubmit = () => {
           // setComic(newComics);
           // setShowLoading(false);
           if(!isUpdate){
-            if (category == "" || name=="" || chapters == "" || content == "" || status == "") {
+            if (category == "" || name=="" || chapters == "" || content == "" ) {
  
               Alert.alert(
                 'Bạn phải nhập đầy đủ thông tin')
@@ -241,6 +241,7 @@ const handleSubmit = () => {
               }
           }
           if(isUpdate){
+            setShowAddComic(false)
             let newComic=[...comics];
             console.log(newComic)
              const updateSubjectIndex = newComic.findIndex(item => item.id === responseJson.id);
@@ -249,18 +250,11 @@ const handleSubmit = () => {
   newComic[updateSubjectIndex] = responseJson;
   setComic(newComic);
   setShowLoading(false);}
-  setShowAddComic(false)
+
       })
       .catch((error) => console.log(`ERROR: ${error}`));
     
-  setModalData({
-      category: '',
-      name: '',
-      img: '',
-      chapters: '',
-      author:'',
-      content:''
-  });
+ 
 
 }
 
